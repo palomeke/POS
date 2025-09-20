@@ -1,6 +1,4 @@
-import React from "react";
-import { orders } from "../../constants";
-import { GrUpdate } from "react-icons/gr";
+﻿import React from "react";
 import {
   keepPreviousData,
   useMutation,
@@ -9,23 +7,23 @@ import {
 } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders, updateOrderStatus } from "../../https/index";
-import { formatDateAndTime } from "../../utils";
+import { countOrderItems, formatDateAndTime } from "../../utils";
 
 const RecentOrders = () => {
   const queryClient = useQueryClient();
+
   const handleStatusChange = ({ orderId, orderStatus }) => {
-    console.log(orderId);
     orderStatusUpdateMutation.mutate({ orderId, orderStatus });
   };
 
   const orderStatusUpdateMutation = useMutation({
     mutationFn: ({ orderId, orderStatus }) =>
       updateOrderStatus({ orderId, orderStatus }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       enqueueSnackbar("Order status updated successfully!", {
         variant: "success",
       });
-      queryClient.invalidateQueries(["orders"]); // Refresh order list
+      queryClient.invalidateQueries(["orders"]);
     },
     onError: () => {
       enqueueSnackbar("Failed to update order status!", { variant: "error" });
@@ -34,17 +32,13 @@ const RecentOrders = () => {
 
   const { data: resData, isError } = useQuery({
     queryKey: ["orders"],
-    queryFn: async () => {
-      return await getOrders();
-    },
+    queryFn: async () => getOrders(),
     placeholderData: keepPreviousData,
   });
 
   if (isError) {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
-
-  console.log(resData.data.data);
 
   return (
     <div className="container mx-auto bg-[#262626] p-4 rounded-lg">
@@ -83,10 +77,10 @@ const RecentOrders = () => {
                         : "text-yellow-500"
                     }`}
                     value={order.orderStatus}
-                    onChange={(e) =>
+                    onChange={(event) =>
                       handleStatusChange({
                         orderId: order._id,
-                        orderStatus: e.target.value,
+                        orderStatus: event.target.value,
                       })
                     }
                   >
@@ -99,9 +93,9 @@ const RecentOrders = () => {
                   </select>
                 </td>
                 <td className="p-4">{formatDateAndTime(order.orderDate)}</td>
-                <td className="p-4">{order.items.length} Items</td>
+                <td className="p-4">{countOrderItems(order)} Items</td>
                 <td className="p-4">Table - {order.table.tableNo}</td>
-                <td className="p-4">₹{order.bills.totalWithTax}</td>
+                <td className="p-4">Bs {Number(order.bills.totalWithTax).toFixed(2)}</td>
                 <td className="p-4">{order.paymentMethod}</td>
               </tr>
             ))}

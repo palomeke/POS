@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { register } from "../../https";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -102,7 +102,7 @@ const Register = ({ setIsRegister }) => {
         </div>
         <div>
           <label className="block text-[#212529] mb-2 mt-3 text-sm font-semibold">
-            Contraseña
+            Contrasena
           </label>
           <div className="flex item-center rounded-lg p-5 px-4 bg-[#F8F9FA]">
             <input
@@ -122,7 +122,7 @@ const Register = ({ setIsRegister }) => {
           </label>
 
           <div className="flex item-center gap-3 mt-4">
-            {["Mesero", "Cajero", "Administrador"].map((role) => {
+            {["Cocina", "Cajero", "Administrador"].map((role) => {
               return (
                 <button
                   key={role}
@@ -151,3 +151,4 @@ const Register = ({ setIsRegister }) => {
 };
 
 export default Register;
+

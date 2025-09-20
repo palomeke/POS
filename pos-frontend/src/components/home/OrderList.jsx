@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCheckDouble, FaLongArrowAltRight } from "react-icons/fa";
 import { FaCircle } from "react-icons/fa";
-import { getAvatarName } from "../../utils/index";
+import { countOrderItems, getAvatarName } from "../../utils";
 
 const OrderList = ({ key, order }) => {
   return (
@@ -14,7 +14,7 @@ const OrderList = ({ key, order }) => {
           <h1 className="text-[#21  2529] text-lg font-semibold tracking-wide">
             {order.customerDetails.name}
           </h1>
-          <p className="text-[#212529] text-sm">{order.items.length} Items</p>
+          <p className="text-[#212529] text-sm">{countOrderItems(order)} Items</p>
         </div>
 
         <h1 className="text-[#f6b100] font-semibold border border-[#f6b100] rounded-lg p-1">
@@ -43,3 +43,5 @@ const OrderList = ({ key, order }) => {
 };
 
 export default OrderList;
+
+

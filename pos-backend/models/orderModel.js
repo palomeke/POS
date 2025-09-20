@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
     customerDetails: {
@@ -19,7 +19,14 @@ const orderSchema = new mongoose.Schema({
         tax: { type: Number, required: true },
         totalWithTax: { type: Number, required: true }
     },
-    items: [],
+    items: [
+        {
+            name: { type: String, required: true },
+            quantity: { type: Number, required: true },
+            pricePerQuantity: { type: Number, required: true },
+            price: { type: Number, required: true },
+        },
+    ],
     table: { type: mongoose.Schema.Types.ObjectId, ref: "Table" },
     paymentMethod: String,
     paymentData: {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../../https/index";
 import { enqueueSnackbar } from "notistack";
@@ -14,12 +14,12 @@ const Login = () => {
     password: "",
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
     loginMutation.mutate(formData);
   };
 
@@ -27,10 +27,16 @@ const Login = () => {
     mutationFn: (reqData) => login(reqData),
     onSuccess: (res) => {
       const { data } = res;
-      console.log(data);
       const { _id, name, email, phone, role } = data.data;
       dispatch(setUser({ _id, name, email, phone, role }));
-      navigate("/");
+
+      if (role === "Administrador") {
+        navigate("/dashboard");
+      } else if (role === "Cocina") {
+        navigate("/orders");
+      } else {
+        navigate("/");
+      }
     },
     onError: (error) => {
       const { response } = error;
@@ -59,7 +65,7 @@ const Login = () => {
         </div>
         <div>
           <label className="block text-[#212729] mb-2 mt-3 text-sm font-bold">
-            Contraseña
+            Contrasena
           </label>
           <div className="flex item-center rounded-lg p-5 px-4 bg-[#F8F9FA]">
             <input
@@ -67,7 +73,7 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Ingrese su contraseña"
+              placeholder="Ingrese su contrasena"
               className="bg-transparent flex-1 text-[#212729] focus:outline-none"
               required
             />

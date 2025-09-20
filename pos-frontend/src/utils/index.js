@@ -1,4 +1,4 @@
-export const getBgColor = () => {
+﻿export const getBgColor = () => {
   const bgarr = [
     "#b73e3e",
     "#5b45b0",
@@ -61,3 +61,65 @@ export const formatDateAndTime = (date) => {
 
   return dateAndTime;
 };
+
+export const extractOrderItems = (order = {}) => {
+  const candidates = [
+    order?.items,
+    order?.orderItems,
+    order?.itemsOrdered,
+    order?.cartItems,
+    order?.products,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+
+    if (Array.isArray(candidate)) {
+      if (candidate.length > 0) {
+        return candidate;
+      }
+      continue;
+    }
+
+    if (typeof candidate === "object") {
+      const values = Object.values(candidate);
+      if (values.length > 0) {
+        return values;
+      }
+    }
+  }
+
+  if (Array.isArray(order?.items)) {
+    return order.items;
+  }
+
+  if (order?.items && typeof order.items === "object") {
+    return Object.values(order.items);
+  }
+
+  return [];
+};
+
+export const getOrderItemLabel = (item = {}) =>
+  item?.name ||
+  item?.title ||
+  item?.dishName ||
+  item?.productName ||
+  item?.itemName ||
+  item?.product?.name ||
+  "Item";
+
+export const getOrderItemQuantity = (item = {}) =>
+  item?.quantity ??
+  item?.qty ??
+  item?.count ??
+  item?.quantityOrdered ??
+  item?.quantityRequested ??
+  1;
+
+export const countOrderItems = (order = {}) => {
+  const items = extractOrderItems(order);
+  if (!items.length) return 0;
+  return items.reduce((sum, item) => sum + getOrderItemQuantity(item), 0);
+};
+
