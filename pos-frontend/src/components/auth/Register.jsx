@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { register } from "../../https";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -70,7 +70,7 @@ const Register = ({ setIsRegister }) => {
         </div>
         <div>
           <label className="block text-[#212529] mb-2 mt-3 text-sm font-semibold">
-            Employee Email
+            Correo del Empleado
           </label>
           <div className="flex item-center rounded-lg p-5 px-4 bg-[#F8F9FA]">
             <input
@@ -78,7 +78,7 @@ const Register = ({ setIsRegister }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter employee email"
+              placeholder="Ingrese el correo del empleado"
               className="bg-transparent flex-1 text-[#6C757D] focus:outline-none"
               required
             />
@@ -94,7 +94,7 @@ const Register = ({ setIsRegister }) => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Enter employee phone"
+              placeholder="Ingrese el telefono del empleado"
               className="bg-transparent flex-1 text-[#6C757D] focus:outline-none"
               required
             />
@@ -110,7 +110,7 @@ const Register = ({ setIsRegister }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter password"
+              placeholder="Ingrese la contrasena"
               className="bg-transparent flex-1 text-[#6C757D] focus:outline-none"
               required
             />
@@ -151,4 +151,5 @@ const Register = ({ setIsRegister }) => {
 };
 
 export default Register;
+
 

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import {
   keepPreviousData,
   useMutation,
@@ -13,22 +13,26 @@ import {
   getOrderItemQuantity,
 } from "../../utils";
 
-const STATUS_OPTIONS = [
-  { value: "In Progress", label: "En progreso" },
-  { value: "Completed", label: "Completado" },
-];
-
-const LEGACY_COMPLETED_STATUSES = ["Ready", "Completado", "Completed"];
-
-const isCompletedStatus = (status = "") =>
-  LEGACY_COMPLETED_STATUSES.includes(status);
-
-const getStatusLabel = (status = "") => {
-  if (status === "Ready") return "Listo";
-  if (status === "In Progress") return "En progreso";
-  if (status === "Completed") return "Completado";
-  return status;
+const STATUS_META = {
+  "In Progress": {
+    label: "En progreso",
+    className: "bg-[#4a452e] text-yellow-400",
+  },
+  Ready: {
+    label: "Listo",
+    className: "bg-[#2e4a40] text-green-400",
+  },
 };
+
+const COMPLETED_STATUSES = ["Completed"];
+
+const isCompletedStatus = (status = "") => COMPLETED_STATUSES.includes(status);
+
+const getStatusMeta = (status = "") =>
+  STATUS_META[status] ?? {
+    label: status || "-",
+    className: "bg-[#4a452e] text-yellow-400",
+  };
 
 const getDateParts = (timestamp) => {
   if (!timestamp) {
@@ -103,115 +107,160 @@ const KitchenOrders = () => {
 
   const orders = resData?.data?.data ?? [];
   const activeOrders = orders.filter(
-    (order) => !isCompletedStatus(order.orderStatus)
+    (order) =>
+      !isCompletedStatus(order.orderStatus) &&
+      order.orderStatus === "In Progress"
   );
 
-  const handleStatusChange = (orderId, orderStatus) => {
-    orderStatusUpdateMutation.mutate({ orderId, orderStatus });
+  const handleStatusChange = (orderId) => {
+    orderStatusUpdateMutation.mutate({ orderId, orderStatus: "Ready" });
   };
 
   return (
-    <div className="bg-[#262626] p-6 rounded-xl shadow-lg">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[#f5f5f5] text-2xl font-semibold">
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-[#e9ecef]">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h2 className="text-[#212529] text-2xl font-semibold">
           Pedidos de Cocina
         </h2>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-[#f5f5f5]">
-          <thead className="bg-[#333333] text-[#ababab] uppercase text-sm">
-            <tr>
-              <th className="p-3 font-medium">Pedido</th>
-              <th className="p-3 font-medium">Cliente</th>
-              <th className="p-3 font-medium">Estado</th>
-              <th className="p-3 font-medium">Fecha</th>
-              <th className="p-3 font-medium">Hora</th>
-              <th className="p-3 font-medium">Pedido realizado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeOrders.length === 0 ? (
+      <div className="hidden md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[#212529]">
+            <thead className="bg-[#f8f9fa] text-[#6c757d] uppercase text-sm">
               <tr>
-                <td className="p-6 text-center text-[#ababab]" colSpan={6}>
-                  No hay pedidos pendientes en este momento.
-                </td>
+                <th className="p-3 font-medium">Pedido</th>
+                <th className="p-3 font-medium">Cliente</th>
+                <th className="p-3 font-medium">Estado</th>
+                <th className="p-3 font-medium">Fecha</th>
+                <th className="p-3 font-medium">Hora</th>
+                <th className="p-3 font-medium">Pedido realizado</th>
               </tr>
-            ) : (
-              activeOrders.map((order) => {
-                const { date, time } = getDateParts(order.orderDate);
-                const orderItems = extractOrderItems(order);
+            </thead>
+            <tbody>
+              {activeOrders.length === 0 ? (
+                <tr>
+                  <td className="p-6 text-center text-[#ababab]" colSpan={6}>
+                    No hay pedidos pendientes en este momento.
+                  </td>
+                </tr>
+              ) : (
+                activeOrders.map((order) => {
+                  const { date, time } = getDateParts(order.orderDate);
+                  const orderItems = extractOrderItems(order);
+                  const statusMeta = getStatusMeta(order.orderStatus);
+                  const isUpdating =
+                    orderStatusUpdateMutation.isPending &&
+                    orderStatusUpdateMutation.variables?.orderId === order._id;
 
-                const options = STATUS_OPTIONS.some(
-                  (option) => option.value === order.orderStatus
-                )
-                  ? STATUS_OPTIONS
-                  : [
-                      ...STATUS_OPTIONS,
-                      {
-                        value: order.orderStatus,
-                        label: getStatusLabel(order.orderStatus),
-                      },
-                    ];
-
-                return (
-                  <tr
-                    key={order._id}
-                    className="border-b border-[#3d3d3d] hover:bg-[#333333]"
-                  >
-                    <td className="p-4 whitespace-nowrap">
-                      #{Math.floor(new Date(order.orderDate).getTime())}
-                    </td>
-                    <td className="p-4">{order.customerDetails?.name ?? "Cliente"}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            isCompletedStatus(order.orderStatus)
-                              ? "bg-[#2e4a40] text-green-400"
-                              : "bg-[#4a452e] text-yellow-400"
+                  return (
+                    <tr
+                      key={order._id}
+                      className="border-b border-[#e9ecef] hover:bg-[#f8f9fa]"
+                    >
+                      <td className="p-4 whitespace-nowrap">
+                        #{Math.floor(new Date(order.orderDate).getTime())}
+                      </td>
+                      <td className="p-4">
+                        {order.customerDetails?.name ?? "Cliente"}
+                      </td>
+                      <td className="p-4">
+                        <button
+                          type="button"
+                          onClick={() => handleStatusChange(order._id)}
+                          disabled={isUpdating}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                            isUpdating
+                              ? "bg-[#4a452e] text-yellow-400 opacity-70 cursor-not-allowed"
+                              : statusMeta.className
+                          } ${
+                            isUpdating ? "cursor-not-allowed" : "hover:opacity-90"
                           }`}
                         >
-                          {getStatusLabel(order.orderStatus)}
-                        </span>
-                        <select
-                          className="bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f6b100]"
-                          value={order.orderStatus}
-                          onChange={(event) =>
-                            handleStatusChange(order._id, event.target.value)
-                          }
-                        >
-                          {options.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                    <td className="p-4">{date}</td>
-                    <td className="p-4">{time}</td>
-                    <td className="p-4">
-                      {orderItems.length === 0 ? (
-                        <span className="text-sm text-[#ababab]">
-                          Sin items registrados
-                        </span>
-                      ) : (
-                        <ul className="space-y-1 text-sm text-[#f5f5f5]/80">
-                          {orderItems.map((item, index) => (
-                            <li key={`${order._id}-${index}`}>
-                              {getOrderItemLabel(item)} x
-                              {getOrderItemQuantity(item)}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                          {isUpdating ? "Actualizando..." : statusMeta.label}
+                        </button>
+                      </td>
+                      <td className="p-4">{date}</td>
+                      <td className="p-4">{time}</td>
+                      <td className="p-4">
+                        {orderItems.length === 0 ? (
+                          <span className="text-sm text-[#ababab]">
+                            Sin items registrados
+                          </span>
+                        ) : (
+                          <ul className="space-y-1 text-sm text-[#212529]/80">
+                            {orderItems.map((item, index) => (
+                              <li key={`${order._id}-${index}`}>
+                                {getOrderItemQuantity(item)} {getOrderItemLabel(item)}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="space-y-4 md:hidden">
+        {activeOrders.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-[#e9ecef] bg-[#f8f9fa] p-6 text-center text-[#ababab]">
+            No hay pedidos pendientes en este momento.
+          </div>
+        ) : (
+          activeOrders.map((order) => {
+            const { date, time } = getDateParts(order.orderDate);
+            const orderItems = extractOrderItems(order);
+            const statusMeta = getStatusMeta(order.orderStatus);
+            const isUpdating =
+              orderStatusUpdateMutation.isPending &&
+              orderStatusUpdateMutation.variables?.orderId === order._id;
+
+            return (
+              <div
+                key={order._id}
+                className="rounded-xl border border-[#e9ecef] bg-[#f8f9fa] p-4 shadow-sm"
+              >
+                <div className="flex flex-col gap-2 text-[#212529]">
+                  <p className="text-sm font-semibold">
+                    Pedido #{Math.floor(new Date(order.orderDate).getTime())}
+                  </p>
+                  <p className="text-sm">Cliente: {order.customerDetails?.name ?? "Cliente"}</p>
+                  <p className="text-sm">
+                    {date} - {time}
+                  </p>
+                </div>
+                <div className="mt-3 space-y-1 text-sm text-[#212529]/80">
+                  {orderItems.length === 0 ? (
+                    <span className="text-sm text-[#ababab]">
+                      Sin items registrados
+                    </span>
+                  ) : (
+                    orderItems.map((item, index) => (
+                      <p key={`${order._id}-mobile-${index}`}>
+                        {getOrderItemQuantity(item)} {getOrderItemLabel(item)}
+                      </p>
+                    ))
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange(order._id)}
+                  disabled={isUpdating}
+                  className={`mt-4 w-full rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
+                    isUpdating
+                      ? "bg-[#4a452e] text-yellow-400 opacity-70 cursor-not-allowed"
+                      : statusMeta.className
+                  } ${isUpdating ? "cursor-not-allowed" : "hover:opacity-90"}`}
+                >
+                  {isUpdating ? "Actualizando..." : statusMeta.label}
+                </button>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

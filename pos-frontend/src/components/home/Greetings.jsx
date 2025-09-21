@@ -32,17 +32,17 @@ const Greetings = () => {
     ).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
 
   return (
-    <div className="flex justify-between items-center px-8 mt-5">
+    <div className="flex flex-col gap-4 px-4 pt-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 lg:px-8 xl:flex-row xl:items-center xl:justify-between xl:px-8 xl:pt-6">
       <div>
-        <h1 className="text-[#212529] text-2xl font-semibold">
+        <h1 className="text-[#212529] text-2xl font-semibold sm:text-3xl">
           Buenos Dias, {userData.name || "TEST USER"}
         </h1>
       </div>
-      <div>
-        <h1 className="text-[#212529] text-3xl font-bold tracking-wide w-[130px">
+      <div className="flex flex-col items-start sm:items-end">
+        <h1 className="text-[#212529] text-3xl font-bold tracking-wide sm:text-4xl">
           {formatTime(dateTime)}
         </h1>
-        <p className="text-[#212529] text-sm font-semibold">
+        <p className="text-[#212529] text-sm font-semibold sm:text-base">
           {formatDate(dateTime)}
         </p>
       </div>

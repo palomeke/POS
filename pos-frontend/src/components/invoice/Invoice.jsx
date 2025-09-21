@@ -4,6 +4,12 @@ import { FaCheck } from "react-icons/fa6";
 
 const Invoice = ({ orderInfo, setShowInvoice }) => {
   const invoiceRef = useRef(null);
+  const paymentMethodLabel =
+    orderInfo.paymentMethod === "Cash"
+      ? "Efectivo"
+      : orderInfo.paymentMethod === "Online"
+      ? "En linea"
+      : orderInfo.paymentMethod ?? "-";
   const handlePrint = () => {
     const printContent = invoiceRef.current.innerHTML;
     const WinPrint = window.open("", "", "width=900,height=650");
@@ -11,7 +17,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
     WinPrint.document.write(`
             <html>
               <head>
-                <title>Order Receipt</title>
+                <title>Recibo de pedido</title>
                 <style>
                   body { font-family: Arial, sans-serif; padding: 20px; }
                   .receipt-container { width: 300px; border: 1px solid #ddd; padding: 10px; }
@@ -57,31 +63,33 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             </motion.div>
           </div>
 
-          <h2 className="text-xl font-bold text-center mb-2">Order Receipt</h2>
-          <p className="text-gray-600 text-center">Thank you for your order!</p>
+          <h2 className="text-xl font-bold text-center mb-2">
+            Recibo de pedido
+          </h2>
+          <p className="text-gray-600 text-center">Gracias por tu compra</p>
 
           {/* Order Details */}
 
           <div className="mt-4 border-t pt-4 text-sm text-gray-700">
             <p>
-              <strong>Order ID:</strong>{" "}
+              <strong>Pedido:</strong>{" "}
               {Math.floor(new Date(orderInfo.orderDate).getTime())}
             </p>
             <p>
-              <strong>Name:</strong> {orderInfo.customerDetails.name}
+              <strong>Nombre:</strong> {orderInfo.customerDetails.name}
             </p>
             <p>
-              <strong>Phone:</strong> {orderInfo.customerDetails.phone}
+              <strong>Telefono:</strong> {orderInfo.customerDetails.phone}
             </p>
             <p>
-              <strong>Guests:</strong> {orderInfo.customerDetails.guests}
+              <strong>Comensales:</strong> {orderInfo.customerDetails.guests}
             </p>
           </div>
 
           {/* Items Summary */}
 
           <div className="mt-4 border-t pt-4">
-            <h3 className="text-sm font-semibold">Items Ordered</h3>
+            <h3 className="text-sm font-semibold">Articulos pedidos</h3>
             <ul className="text-sm text-gray-700">
               {orderInfo.items.map((item, index) => (
                 <li
@@ -91,7 +99,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
                   <span>
                     {item.name} x{item.quantity}
                   </span>
-                  <span>₹{item.price.toFixed(2)}</span>
+                  <span>Bs {item.price.toFixed(2)}</span>
                 </li>
               ))}
             </ul>
@@ -101,14 +109,14 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
 
           <div className="mt-4 border-t pt-4 text-sm">
             <p>
-              <strong>Subtotal:</strong> ₹{orderInfo.bills.total.toFixed(2)}
+              <strong>Subtotal:</strong> Bs {orderInfo.bills.total.toFixed(2)}
             </p>
             <p>
-              <strong>Tax:</strong> ₹{orderInfo.bills.tax.toFixed(2)}
+              <strong>Impuesto:</strong> Bs {orderInfo.bills.tax.toFixed(2)}
             </p>
             <p className="text-md font-semibold">
-              <strong>Grand Total:</strong> ₹
-              {orderInfo.bills.totalWithTax.toFixed(2)}
+              <strong>Total:</strong>
+              Bs {orderInfo.bills.totalWithTax.toFixed(2)}
             </p>
           </div>
 
@@ -117,19 +125,19 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           <div className="mb-2 mt-2 text-xs">
             {orderInfo.paymentMethod === "Cash" ? (
               <p>
-                <strong>Payment Method:</strong> {orderInfo.paymentMethod}
+                <strong>Metodo de pago:</strong> {paymentMethodLabel}
               </p>
             ) : (
               <>
                 <p>
-                  <strong>Payment Method:</strong> {orderInfo.paymentMethod}
+                  <strong>Metodo de pago:</strong> {paymentMethodLabel}
                 </p>
                 <p>
-                  <strong>Razorpay Order ID:</strong>{" "}
+                  <strong>ID de pedido Razorpay:</strong>{" "}
                   {orderInfo.paymentData?.razorpay_order_id}
                 </p>
                 <p>
-                  <strong>Razorpay Payment ID:</strong>{" "}
+                  <strong>ID de pago Razorpay:</strong>{" "}
                   {orderInfo.paymentData?.razorpay_payment_id}
                 </p>
               </>
@@ -143,13 +151,13 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             onClick={handlePrint}
             className="text-blue-500 hover:underline text-xs px-4 py-2 rounded-lg"
           >
-            Print Receipt
+            Imprimir recibo
           </button>
           <button
             onClick={() => setShowInvoice(false)}
             className="text-red-500 hover:underline text-xs px-4 py-2 rounded-lg"
           >
-            Close
+            Cerrar
           </button>
         </div>
       </div>

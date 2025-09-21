@@ -7,6 +7,7 @@ import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
 import { useSelector } from "react-redux";
+
 const Menu = () => {
   useEffect(() => {
     document.title = "POS | Menu";
@@ -14,41 +15,39 @@ const Menu = () => {
 
   const customerData = useSelector((state) => state.customer);
   return (
-    <section className="bg-[#F8F9FA] h-[calc(100vh-5rem)] overflow-hidden flex gap-3">
-      {/* Left Div */}
-      <div className="flex-[3] ">
-        <div className="flex items-center justify-between px-10 py-4">
-          <div className="flex items-center gap-4">
-            <BackButton />
-            <h1 className="text-[#212529] text-2xl font-bold tracking-wide">
-              Menu
-            </h1>
-          </div>
-          <div className="flex items-center justify-around gap-4">
-            <div className="flex items-center gap-3 cursor-pointer">
-              <MdRestaurantMenu className="text-[#212529] text-5xl" />
+    <section className="bg-[#F8F9FA] min-h-[calc(100vh-5rem)] overflow-y-auto pb-20">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10 xl:flex-row xl:items-start xl:gap-6">
+        <div className="flex flex-col gap-4 xl:flex-[3]">
+          <div className="flex flex-col gap-3 rounded-2xl bg-white/85 p-4 shadow-sm ring-1 ring-[#f1f3f5] sm:flex-row sm:items-center sm:justify-between sm:p-6 xl:bg-transparent xl:p-0 xl:shadow-none xl:ring-0">
+            <div className="flex items-center gap-3">
+              <BackButton />
+              <h1 className="text-[#212529] text-2xl font-bold tracking-wide sm:text-3xl">
+                Menu
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <MdRestaurantMenu className="text-[#212529] text-4xl sm:text-5xl" />
               <div className="flex flex-col items-start">
-                <h1 className="text-md text-[#212529] font-semibold">
+                <h1 className="text-md font-semibold text-[#212529]">
                   {customerData.customerName || "Nombre del cliente"}
                 </h1>
-                <p className="text-xs text-[#212529] font-medium">
+                <p className="text-xs font-medium text-[#212529]">
                   Mesa: {customerData.table?.tableNo || "N/A"}
                 </p>
               </div>
             </div>
           </div>
+          <div className="rounded-2xl bg-white/90 shadow-sm ring-1 ring-[#f1f3f5] xl:bg-transparent xl:shadow-none xl:ring-0">
+            <MenuContainer />
+          </div>
         </div>
-        <MenuContainer />
-      </div>
-      {/* Rigtht Div */}
-      <div className="flex-[1] bg-[#FFFFFF] mt-4 mr-3 h-[780px]rounded-lg pt-2">
-        {/*Custumer Info Div */}
-        <CustomerInfo />
-        <hr className="border-gray-300 border-t my-6 w-full" />
-        {/*Cart Items Div */}
-        <CartInfo />
-        {/*Bill Div */}
-        <Bill />
+
+        <div className="flex flex-col gap-6 rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-[#f1f3f5] sm:p-6 xl:flex-[1] xl:bg-white xl:p-6 xl:shadow-sm xl:ring-0">
+          <CustomerInfo />
+          <hr className="border-t border-gray-300" />
+          <CartInfo />
+          <Bill />
+        </div>
       </div>
 
       <BottomNav />

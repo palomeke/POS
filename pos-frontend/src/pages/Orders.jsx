@@ -11,12 +11,14 @@ import {
 import { getOrders, updateOrderStatus, updateTable } from "../https/index";
 import { enqueueSnackbar } from "notistack";
 import KitchenOrders from "../components/orders/KitchenOrders";
+import Greetings from "../components/home/Greetings";
 import { useSelector } from "react-redux";
 
 const KitchenOrdersPage = () => {
   return (
-    <section className="bg-[#1a1a1a] min-h-[calc(100vh-5rem)] overflow-y-auto py-10 px-4">
-      <div className="max-w-6xl mx-auto">
+    <section className="bg-[#F8F9FA] min-h-[calc(100vh-5rem)] overflow-y-auto pb-20">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
+        <Greetings />
         <KitchenOrders />
       </div>
     </section>
@@ -35,7 +37,9 @@ const statusMatchesFilter = (orderStatus = "", filterKey) => {
 
   switch (filterKey) {
     case "progress":
-      return normalizedStatus === "in progress" || normalizedStatus === "progress";
+      return (
+        normalizedStatus === "in progress" || normalizedStatus === "progress"
+      );
     case "ready":
       return normalizedStatus === "ready";
     case "completed":
@@ -75,7 +79,9 @@ const OrdersListPage = () => {
       return response;
     },
     onSuccess: () => {
-      enqueueSnackbar("Pedido actualizado correctamente", { variant: "success" });
+      enqueueSnackbar("Pedido actualizado correctamente", {
+        variant: "success",
+      });
       queryClient.invalidateQueries(["orders"]);
       queryClient.invalidateQueries(["tables"]);
     },
@@ -87,7 +93,7 @@ const OrdersListPage = () => {
   });
 
   if (isError) {
-    enqueueSnackbar("Something went wrong!", { variant: "error" });
+    enqueueSnackbar("Ocurrio un error", { variant: "error" });
   }
 
   const orders = resData?.data?.data ?? [];
@@ -100,45 +106,50 @@ const OrdersListPage = () => {
   };
 
   return (
-    <section className="bg-[#F8F9FA] h-[calc(100vh-5rem)] overflow-hidden ">
-      <div className="flex items-center justify-between px-10 py-4">
-        <div className="flex items-center gap-4">
-          <BackButton />
-          <h1 className="text-[#212529] text-2xl font-bold tracking-wide">
-            Mis Pedidos
-          </h1>
+    <section className="bg-[#F8F9FA] min-h-[calc(100vh-5rem)] overflow-hidden pb-20">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <h1 className="text-[#212529] text-2xl font-bold tracking-wide sm:text-3xl">
+              Mis Pedidos
+            </h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 rounded-full bg-white/80 p-1 shadow-sm ring-1 ring-[#f1f3f5] lg:bg-transparent lg:p-0 lg:shadow-none lg:ring-0">
+            {filters.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  statusFilter === key
+                    ? "bg-[#f6b100] text-[#212529]"
+                    : "text-[#212529]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center justify-around gap-4">
-          {filters.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setStatusFilter(key)}
-              className={`text-[#212529] text-lg rounded-lg px-5 py-2 font-semibold transition-colors ${
-                statusFilter === key ? "bg-[#f6b100]" : "bg-transparent"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
+              <OrderCard
+                key={order._id}
+                order={order}
+                canComplete={isCashier}
+                onComplete={handleMarkAsCompleted}
+                isCompleting={
+                  completeOrderMutation.isPending &&
+                  completeOrderMutation.variables?._id === order._id
+                }
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">No hay pedidos disponibles</p>
+          )}
         </div>
-      </div>
-      <div className="grid grid-cols-3 gap-3 px-16 py-4 overflow-y-scroll scrollbar-hide">
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => (
-            <OrderCard
-              key={order._id}
-              order={order}
-              canComplete={isCashier}
-              onComplete={handleMarkAsCompleted}
-              isCompleting={
-                completeOrderMutation.isPending &&
-                completeOrderMutation.variables?._id === order._id
-              }
-            />
-          ))
-        ) : (
-          <p className="col-span-3 text-gray-500">No orders available</p>
-        )}
       </div>
 
       <BottomNav />
@@ -151,7 +162,7 @@ const Orders = () => {
   const isKitchen = role === "Cocina";
 
   useEffect(() => {
-    document.title = isKitchen ? "POS | Cocina" : "POS | Orders";
+    document.title = isKitchen ? "POS | Cocina" : "POS | Pedidos";
   }, [isKitchen]);
 
   return isKitchen ? <KitchenOrdersPage /> : <OrdersListPage />;

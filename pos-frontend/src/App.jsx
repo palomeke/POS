@@ -75,7 +75,7 @@ function Layout() {
             </ProtectedRoutes>
           }
         />
-        <Route path="*" element={<div>Not Found</div>} />
+        <Route path="*" element={<div>No encontrado</div>} />
       </Routes>
     </>
   );
@@ -99,3 +99,4 @@ function App() {
 }
 
 export default App;
+

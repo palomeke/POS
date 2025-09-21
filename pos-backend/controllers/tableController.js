@@ -1,4 +1,4 @@
-const Table = require("../models/tableModel");
+﻿const Table = require("../models/tableModel");
 const createHttpError = require("http-errors");
 const mongoose = require("mongoose")
 
@@ -30,7 +30,7 @@ const getTables = async (req, res, next) => {
   try {
     const tables = await Table.find().populate({
       path: "currentOrder",
-      select: "customerDetails"
+      select: "customerDetails orderStatus"
     });
     res.status(200).json({ success: true, data: tables });
   } catch (error) {
@@ -68,3 +68,4 @@ const updateTable = async (req, res, next) => {
 };
 
 module.exports = { addTable, getTables, updateTable };
+

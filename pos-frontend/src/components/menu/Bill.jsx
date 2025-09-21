@@ -33,7 +33,7 @@ const Bill = () => {
   const customerData = useSelector((state) => state.customer);
   const cartData = useSelector((state) => state.cart);
   const total = useSelector(getTotalPrice);
-  const taxRate = 5.25;
+  const taxRate = 0;
   const tax = (total * taxRate) / 100;
   const totalPriceWithTax = total + tax;
 
@@ -43,7 +43,7 @@ const Bill = () => {
 
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
-      enqueueSnackbar("Please select a payment method!", {
+      enqueueSnackbar("Selecciona un metodo de pago", {
         variant: "warning",
       });
 
@@ -51,20 +51,17 @@ const Bill = () => {
     }
 
     if (paymentMethod === "Online") {
-      // load the script
       try {
         const res = await loadScript(
           "https://checkout.razorpay.com/v1/checkout.js"
         );
 
         if (!res) {
-          enqueueSnackbar("Razorpay SDK failed to load. Are you online?", {
+          enqueueSnackbar("No se pudo cargar Razorpay. Verifica tu conexion", {
             variant: "warning",
           });
           return;
         }
-
-        // create order
 
         const reqData = {
           amount: totalPriceWithTax.toFixed(2),
@@ -77,14 +74,12 @@ const Bill = () => {
           amount: data.order.amount,
           currency: data.order.currency,
           name: "RESTRO",
-          description: "Secure Payment for Your Meal",
+          description: "Pago seguro para tu pedido",
           order_id: data.order.id,
           handler: async function (response) {
             const verification = await verifyPaymentRazorpay(response);
-            console.log(verification);
             enqueueSnackbar(verification.data.message, { variant: "success" });
 
-            // Place the order
             const orderData = {
               customerDetails: {
                 name: customerData.customerName,
@@ -122,12 +117,11 @@ const Bill = () => {
         rzp.open();
       } catch (error) {
         console.log(error);
-        enqueueSnackbar("Payment Failed!", {
+        enqueueSnackbar("Pago fallido", {
           variant: "error",
         });
       }
     } else {
-      // Place the order
       const orderData = {
         customerDetails: {
           name: customerData.customerName,
@@ -152,11 +146,9 @@ const Bill = () => {
     mutationFn: (reqData) => addOrder(reqData),
     onSuccess: (resData) => {
       const { data } = resData.data;
-      console.log(data);
 
       setOrderInfo(data);
 
-      // Update Table
       const tableData = {
         status: "Booked",
         orderId: data._id,
@@ -167,7 +159,7 @@ const Bill = () => {
         tableUpdateMutation.mutate(tableData);
       }, 1500);
 
-      enqueueSnackbar("Order Placed!", {
+      enqueueSnackbar("Pedido registrado", {
         variant: "success",
       });
       setShowInvoice(true);
@@ -190,62 +182,42 @@ const Bill = () => {
   });
 
   return (
-    <>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">
-          Items({cartData.lenght})
-        </p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">
-          ₹{total.toFixed(2)}
+    <div className="rounded-2xl bg-white px-4 py-4 shadow-sm sm:px-6">
+      <div className="flex items-center justify-between">
+        <p className="text-2xl font-bold text-[#212529]">Total</p>
+        <h1 className="text-2xl font-bold text-[#212529]">
+          Bs {totalPriceWithTax.toFixed(2)}
         </h1>
       </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">Tax(5.25%)</p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">₹{tax.toFixed(2)}</h1>
-      </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">
-          Total With Tax
-        </p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">
-          ₹{totalPriceWithTax.toFixed(2)}
-        </h1>
-      </div>
-      <div className="flex items-center gap-3 px-5 mt-4">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           onClick={() => setPaymentMethod("Cash")}
-          className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] font-semibold ${
-            paymentMethod === "Cash" ? "bg-[#383737]" : ""
+          className={`w-full rounded-lg px-4 py-3 font-semibold text-[#ababab] transition-colors ${
+            paymentMethod === "Cash" ? "bg-[#383737]" : "bg-[#1f1f1f]"
           }`}
         >
-          Cash
+          Efectivo
         </button>
         <button
           onClick={() => setPaymentMethod("Online")}
-          className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] font-semibold ${
-            paymentMethod === "Online" ? "bg-[#383737]" : ""
+          className={`w-full rounded-lg px-4 py-3 font-semibold text-[#ababab] transition-colors ${
+            paymentMethod === "Online" ? "bg-[#383737]" : "bg-[#1f1f1f]"
           }`}
         >
-          Online
+          En linea
         </button>
       </div>
-
-      <div className="flex items-center gap-3 px-5 mt-4">
-        <button className="bg-[#025cca] px-4 py-3 w-full rounded-lg text-[#f5f5f5] font-semibold text-lg">
-          Print Receipt
-        </button>
-        <button
-          onClick={handlePlaceOrder}
-          className="bg-[#f6b100] px-4 py-3 w-full rounded-lg text-[#1f1f1f] font-semibold text-lg"
-        >
-          Place Order
-        </button>
-      </div>
+      <button
+        onClick={handlePlaceOrder}
+        className="mt-4 w-full rounded-lg bg-[#f6b100] px-4 py-3 text-lg font-semibold text-[#1f1f1f] hover:bg-[#dda108]"
+      >
+        Confirmar pedido
+      </button>
 
       {showInvoice && (
         <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />
       )}
-    </>
+    </div>
   );
 };
 
