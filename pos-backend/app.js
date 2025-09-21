@@ -16,7 +16,8 @@ app.use(
     origin: ["http://localhost:5173"],
   })
 );
-app.use(express.json()); // parse incoming request in json format
+app.use(express.json({ limit: "5mb" })); // parse incoming request in json format
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());
 
 // Root Endpoint
@@ -29,6 +30,7 @@ app.use("/api/user", require("./routes/userRoute"));
 app.use("/api/order", require("./routes/orderRoute"));
 app.use("/api/table", require("./routes/tableRoute"));
 app.use("/api/payment", require("./routes/paymentRoute"));
+app.use("/api/menu", require("./routes/menuRoute"));
 
 // Global Error Handler
 app.use(globalErrorHandler);
@@ -70,6 +72,7 @@ app.use("/api/user", require("./routes/userRoute"));
 app.use("/api/order", require("./routes/orderRoute"));
 app.use("/api/table", require("./routes/tableRoute"));
 app.use("/api/payment", require("./routes/paymentRoute"));
+app.use("/api/menu", require("./routes/menuRoute"));
 
 // Global Error Handler
 app.use(globalErrorHandler);

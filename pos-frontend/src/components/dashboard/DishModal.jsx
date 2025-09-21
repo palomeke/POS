@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { IoMdClose } from "react-icons/io";
 import { FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { addDish, removeDish } from "../../redux/slices/menuSlice";
+import { createDish, removeDishById } from "../../redux/slices/menuSlice";
 import { enqueueSnackbar } from "notistack";
 
 const TYPE_OPTIONS = ["Vegetariano", "No Vegetariano", "Bebida", "Postre"];
@@ -62,7 +62,7 @@ const AddDishModal = ({ onClose }) => {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!formData.categoryId) {
@@ -84,32 +84,54 @@ const AddDishModal = ({ onClose }) => {
 
     const image = imageData || formData.imageUrl.trim() || null;
 
-    dispatch(
-      addDish({
-        categoryId: formData.categoryId,
-        name: trimmedName,
-        price: parsedPrice,
-        image,
-        type: formData.type,
-      })
-    );
+    try {
+      await dispatch(
+        createDish({
+          categoryId: formData.categoryId,
+          name: trimmedName,
+          price: parsedPrice,
+          image,
+          type: formData.type,
+        })
+      ).unwrap();
 
-    enqueueSnackbar("Plato agregado correctamente", { variant: "success" });
-    onClose();
+      enqueueSnackbar("Plato agregado correctamente", { variant: "success" });
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "No se pudo agregar el plato";
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
+    }
   };
 
-  const handleDeleteDish = (dishId) => {
+  const handleDeleteDish = async (dishId) => {
     const shouldRemove = window.confirm(
       "Seguro que deseas eliminar este plato?"
     );
     if (!shouldRemove) return;
 
-    dispatch(removeDish({ categoryId: formData.categoryId, dishId }));
-    enqueueSnackbar("Plato eliminado", { variant: "info" });
+    try {
+      await dispatch(
+        removeDishById({ categoryId: formData.categoryId, dishId })
+      ).unwrap();
+      enqueueSnackbar("Plato eliminado", { variant: "info" });
+    } catch (error) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "No se pudo eliminar el plato";
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -271,9 +293,7 @@ const AddDishModal = ({ onClose }) => {
                           {dish.name}
                         </p>
                         <p className="text-xs text-[#64748b]">
-                          {`Bs ${Number(dish.price).toFixed(2)} � ${
-                            dish.category
-                          }`}
+                          {`Bs ${Number(dish.price).toFixed(2)} - ${dish.type}`}
                         </p>
                       </div>
                       <button

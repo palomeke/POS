@@ -18,10 +18,21 @@ export const updateTable = ({ tableId, ...tableData }) =>
 export const createOrderRazorpay = (data) =>
   axiosWrapper.post("/api/payment/create-order", data);
 export const verifyPaymentRazorpay = (data) =>
-  axiosWrapper.post("/api/payment//verify-payment", data);
+  axiosWrapper.post("/api/payment/verify-payment", data);
 
 // Order Endpoints
 export const addOrder = (data) => axiosWrapper.post("/api/order/", data);
 export const getOrders = () => axiosWrapper.get("/api/order");
 export const updateOrderStatus = ({ orderId, orderStatus }) =>
   axiosWrapper.put(`/api/order/${orderId}`, { orderStatus });
+
+// Menu Endpoints
+export const getMenuCategories = () => axiosWrapper.get("/api/menu/categories");
+export const createMenuCategory = (data) =>
+  axiosWrapper.post("/api/menu/categories", data);
+export const deleteMenuCategory = (categoryId) =>
+  axiosWrapper.delete(`/api/menu/categories/${categoryId}`);
+export const createMenuDish = ({ categoryId, ...dishData }) =>
+  axiosWrapper.post(`/api/menu/categories/${categoryId}/dishes`, dishData);
+export const deleteMenuDish = ({ categoryId, dishId }) =>
+  axiosWrapper.delete(`/api/menu/categories/${categoryId}/dishes/${dishId}`);

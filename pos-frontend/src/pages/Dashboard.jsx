@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { MdTableBar, MdCategory } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Metrics from "../components/dashboard/Metrics";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import TableModal from "../components/dashboard/Modal";
@@ -10,6 +10,7 @@ import AddCategoryModal from "../components/dashboard/CategoryModal";
 import AddDishModal from "../components/dashboard/DishModal";
 import PopularDishes from "../components/home/PopularDishes";
 import { getOrders } from "../https";
+import { fetchMenuCategories } from "../redux/slices/menuSlice";
 
 const buttons = [
   { label: "Agregar Mesa", icon: <MdTableBar />, action: "table" },
@@ -52,9 +53,18 @@ const filterOrdersByRange = (orders, range) => {
 };
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const categoriesLength = useSelector((state) => state.menu.categories.length);
+
   useEffect(() => {
     document.title = "POS | Panel Administrativo";
   }, []);
+
+  useEffect(() => {
+    if (categoriesLength === 0) {
+      dispatch(fetchMenuCategories());
+    }
+  }, [categoriesLength, dispatch]);
 
   const [activeModal, setActiveModal] = useState(null);
   const [activeTab, setActiveTab] = useState("Reporte");

@@ -6,14 +6,24 @@ import MenuContainer from "../components/menu/MenuContainer";
 import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
-import { useSelector } from "react-redux";
+import { fetchMenuCategories } from "../redux/slices/menuSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const Menu = () => {
+  const dispatch = useDispatch();
+  const customerData = useSelector((state) => state.customer);
+  const categoriesLength = useSelector((state) => state.menu.categories.length);
+
   useEffect(() => {
     document.title = "POS | Menu";
   }, []);
 
-  const customerData = useSelector((state) => state.customer);
+  useEffect(() => {
+    if (categoriesLength === 0) {
+      dispatch(fetchMenuCategories());
+    }
+  }, [categoriesLength, dispatch]);
+
   return (
     <section className="bg-[#F8F9FA] min-h-[calc(100vh-5rem)] overflow-y-auto pb-20">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10 xl:flex-row xl:items-start xl:gap-6">

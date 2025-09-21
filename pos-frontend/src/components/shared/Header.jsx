@@ -80,7 +80,7 @@ const Header = () => {
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
               className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 text-[#212529] transition hover:bg-[#f1f3f5] md:hidden"
-              aria-label="Abrir menú"
+              aria-label="Abrir menï¿½"
             >
               {isMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             </button>
@@ -140,7 +140,9 @@ const Header = () => {
                   <span className="text-sm font-semibold text-[#212529]">
                     {userData.name || "TEST USER"}
                   </span>
-                  <span className="text-xs text-[#6c757d]">{userData.role || "Role"}</span>
+                  <span className="text-xs text-[#6c757d]">
+                    {userData.role || "Role"}
+                  </span>
                 </div>
               </div>
               <nav className="flex flex-col gap-2">
@@ -163,7 +165,7 @@ const Header = () => {
                 }}
                 className="w-full rounded-lg bg-[#f6b100] px-4 py-2 text-sm font-semibold text-[#212529] transition hover:bg-[#dda108]"
               >
-                Cerrar sesión
+                Cerrar sesiï¿½n
               </button>
             </div>
           </div>

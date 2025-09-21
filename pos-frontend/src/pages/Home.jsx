@@ -70,9 +70,9 @@ const Home = () => {
                 caption="Ventas registradas hoy"
               />
               <Minicard
-                title="En Progreso"
+                title="Platos Vendidos"
                 icon={<GrInProgress />}
-                value={`${dishesSold} platos`}
+                value={`${dishesSold} `}
                 caption="Platos vendidos hoy"
               />
             </div>

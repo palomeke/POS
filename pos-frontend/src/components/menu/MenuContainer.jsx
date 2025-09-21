@@ -129,7 +129,7 @@ const MenuContainer = () => {
                         {item.name}
                       </h1>
                       <p className="text-xs uppercase tracking-wide text-[#212529]">
-                        {item.category}
+                        {item.type}
                       </p>
                     </div>
                     <button

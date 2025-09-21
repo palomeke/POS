@@ -3,7 +3,10 @@ import { motion } from "framer-motion";
 import { IoMdClose } from "react-icons/io";
 import { FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { addCategory, removeCategory } from "../../redux/slices/menuSlice";
+import {
+  createCategory,
+  removeCategoryById,
+} from "../../redux/slices/menuSlice";
 import { enqueueSnackbar } from "notistack";
 
 const ACCENT_COLORS = ["#f6b100", "#f4c152", "#f2a007", "#f59e0b", "#fcd34d"];
@@ -32,7 +35,7 @@ const AddCategoryModal = ({ onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const trimmedName = formData.name.trim();
     if (!trimmedName) {
@@ -42,19 +45,28 @@ const AddCategoryModal = ({ onClose }) => {
       return;
     }
 
-    dispatch(
-      addCategory({
-        name: trimmedName,
-        bgColor: formData.bgColor,
-        icon: formData.icon.trim(),
-      })
-    );
-
-    enqueueSnackbar("Categoria creada correctamente", { variant: "success" });
-    onClose();
+    try {
+      await dispatch(
+        createCategory({
+          name: trimmedName,
+          bgColor: formData.bgColor,
+          icon: formData.icon.trim(),
+        })
+      ).unwrap();
+      enqueueSnackbar("Categoria creada correctamente", { variant: "success" });
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "No se pudo crear la categoria";
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
+    }
   };
 
-  const handleDeleteCategory = (categoryId) => {
+  const handleDeleteCategory = async (categoryId) => {
     const category = categories.find((item) => item.id === categoryId);
     if (!category) return;
 
@@ -67,12 +79,22 @@ const AddCategoryModal = ({ onClose }) => {
 
     if (!shouldRemove) return;
 
-    dispatch(removeCategory(categoryId));
-    enqueueSnackbar("Categoria eliminada", { variant: "info" });
+    try {
+      await dispatch(removeCategoryById(categoryId)).unwrap();
+      enqueueSnackbar("Categoria eliminada", { variant: "info" });
+    } catch (error) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error?.message || "No se pudo eliminar la categoria";
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

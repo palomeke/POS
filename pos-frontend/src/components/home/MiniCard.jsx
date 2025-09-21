@@ -10,12 +10,14 @@ const MiniCard = ({ title, icon, value, caption }) => {
         <h1 className="text-[#212529] text-lg font-semibold tracking-wide sm:text-xl">
           {title}
         </h1>
-        <span className={`rounded-lg bg-[#fef9c3] p-3 text-2xl ${accentClass}`}>
+        <span className={`rounded-lg bg-[#FFFFFF] p-3 text-2xl ${accentClass}`}>
           {icon}
         </span>
       </div>
       <div>
-        <h1 className="text-[#212529] text-3xl font-bold sm:text-4xl">{value}</h1>
+        <h1 className="text-[#212529] text-3xl font-bold sm:text-4xl">
+          {value}
+        </h1>
         {caption ? (
           <p className="text-[#212529] text-sm sm:text-base">{caption}</p>
         ) : null}
