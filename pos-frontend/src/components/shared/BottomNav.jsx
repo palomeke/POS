@@ -14,8 +14,8 @@ const BottomNav = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
-  const [name, setName] = useState();
-  const [phone, setPhone] = useState();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -34,92 +34,117 @@ const BottomNav = () => {
   const handleCreateOrder = () => {
     dispatch(setCustomer({ name, phone, guests: guestCount }));
     navigate("/tables");
+    closeModal();
   };
 
+  const baseNavItemClasses =
+    "group flex w-full flex-col items-center justify-center gap-1 rounded-2xl py-2 text-xs font-semibold transition-colors sm:flex-row sm:py-3 sm:text-sm md:py-3 md:text-base";
+  const getNavClasses = (path) =>
+    `${baseNavItemClasses} ${
+      isActive(path)
+        ? "bg-[#FF5733] text-[#f5f5f5]"
+        : "text-[#212529] hover:bg-[#f5f5f5]"
+    }`;
+
+  const createOrderDisabled = isActive("/tables") || isActive("/menu");
+  const orderButtonClasses = `${baseNavItemClasses} flex-row gap-3 bg-[#212529] text-[#f5f5f5] hover:bg-[#212529]/90 focus:outline-none focus:ring-2 focus:ring-[#FF5733] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[#212529]/60`;
+
   return (
-    <div className="hidden md:block">
-      <div className="fixed bottom-0 left-0 right-0 bg-[#FFFFFF]">
-        <div className="mx-auto flex w-full max-w-4xl items-center gap-2 px-2 py-2 sm:gap-3 sm:px-4 xl:justify-around">
-          <button
-            onClick={() => navigate("/")}
-            className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[20px] font-bold sm:h-14 xl:h-16 ${
-              isActive("/") ? "bg-[#FF5733] text-[#f5f5f5]" : "text-[#212529]"
-            } xl:w-[300px] xl:flex-none`}
-          >
-            <FaHome className="inline" size={20} /> <p>Inicio</p>
-          </button>
-          <button
-            onClick={() => navigate("/orders")}
-            className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[20px] font-bold sm:h-14 xl:h-16 ${
-              isActive("/orders")
-                ? "bg-[#FF5733] text-[#f5f5f5]"
-                : "text-[#212529]"
-            } xl:w-[300px] xl:flex-none`}
-          >
-            <MdOutlineReorder className="inline" size={20} /> <p>Pedidos</p>
-          </button>
-          <button
-            onClick={() => navigate("/tables")}
-            className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[20px] font-bold sm:h-14 xl:h-16 ${
-              isActive("/tables")
-                ? "bg-[#FF5733] text-[#f5f5f5]"
-                : "text-[#212529]"
-            } xl:w-[300px] xl:flex-none`}
-          >
-            <MdTableBar className="inline" size={20} /> <p>Mesas</p>
-          </button>
-          <button className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[20px] font-bold text-[#ababab] sm:h-14 xl:h-16 xl:w-[300px] xl:flex-none">
-            <CiCircleMore className="inline" size={20} /> <p>Mas</p>
-          </button>
+    <>
+      {/* 🔽 Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF]/95 backdrop-blur">
+        <div
+          className="mx-auto w-full max-w-5xl px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-5 md:px-6 md:pb-6"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)",
+          }}
+        >
+          <div className="grid grid-cols-1 items-stretch gap-1 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 md:gap-3">
+            <button
+              onClick={() => navigate("/")}
+              className={`${getNavClasses("/")} hidden sm:flex`}
+              type="button"
+            >
+              <FaHome className="text-lg sm:text-xl" />
+              <span>Inicio</span>
+            </button>
+            <button
+              onClick={() => navigate("/orders")}
+              className={`${getNavClasses("/orders")} hidden sm:flex`}
+              type="button"
+            >
+              <MdOutlineReorder className="text-lg sm:text-xl" />
+              <span>Pedidos</span>
+            </button>
+            <button
+              onClick={() => navigate("/tables")}
+              className={`${getNavClasses("/tables")} hidden sm:flex`}
+              type="button"
+            >
+              <MdTableBar className="text-lg sm:text-xl" />
+              <span>Mesas</span>
+            </button>
+            <button
+              className={`${baseNavItemClasses} hidden sm:flex text-[#6c757d] hover:bg-[#f5f5f5]`}
+              type="button"
+            >
+              <CiCircleMore className="text-lg sm:text-xl" />
+              <span>Más</span>
+            </button>
+            <button
+              disabled={createOrderDisabled}
+              onClick={openModal}
+              className={`${orderButtonClasses} col-span-1 sm:col-span-4 md:col-span-1`}
+              aria-label="Crear orden"
+              type="button"
+            >
+              <BiSolidDish className="text-xl sm:text-2xl" />
+              <span className="uppercase">Crear orden</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* 🔽 Modal FUERA del nav */}
+      <Modal isOpen={isModalOpen} onClose={closeModal} title="Crear Orden">
+        <div>
+          <label className="block text-[#212529] mb-2 text-sm font-medium">
+            Nombre del cliente
+          </label>
+          <div className="flex items-center rounded-lg p-3 px-4 border border-yellow-500 bg-[#FFFFFF]">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              type="text"
+              placeholder="Ingrese el nombre del cliente"
+              className="bg-transparent flex-1 text-[#212529] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block mb-2 mt-3 text-sm font-medium text-[#212529]">
+            Cantidad de Personas
+          </label>
+          <div className="flex items-center justify-between border border-yellow-500 bg-[#FFFFFF] px-4 py-3 rounded-lg">
+            <button onClick={decrement} className="text-[#FF5733] text-2xl">
+              &minus;
+            </button>
+            <span className="text-[#212529]">{guestCount} Personas</span>
+            <button onClick={increment} className="text-[#FF5733] text-2xl">
+              &#43;
+            </button>
+          </div>
         </div>
 
         <button
-          disabled={isActive("/tables") || isActive("/menu")}
-          onClick={openModal}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#212529] text-[#f5f5f5] rounded-full p-4 flex items-center justify-center shadow-lg"
+          onClick={handleCreateOrder}
+          className="w-full bg-[#F6B100] text-[#212529] rounded-lg py-3 mt-8 hover:bg-yellow-700"
         >
-          <BiSolidDish size={32} />
+          Crear Orden
         </button>
-
-        <Modal isOpen={isModalOpen} onClose={closeModal} title="Crear Orden">
-          <div>
-            <label className="block text-[#212529] mb-2 text-sm font-medium">
-              Nombre del cliente
-            </label>
-            <div className="flex items-center rounded-lg p-3 px-4 border border-yellow-500 bg-[#FFFFFF]">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                type="text"
-                placeholder="Ingrese el nombre del cliente"
-                className="bg-transparent flex-1 text-[#212529] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-2 mt-3 text-sm font-medium text-[#212529]">
-              Cantidad de Personas
-            </label>
-            <div className="flex items-center justify-between border border-yellow-500 bg-[#FFFFFF] px-4 py-3 rounded-lg">
-              <button onClick={decrement} className="text-[#FF5733] text-2xl">
-                &minus;
-              </button>
-              <span className="text-[#212529]">{guestCount} Personas</span>
-              <button onClick={increment} className="text-[#FF5733] text-2xl">
-                &#43;
-              </button>
-            </div>
-          </div>
-          <button
-            onClick={handleCreateOrder}
-            className="w-full bg-[#F6B100] text-[#212529] rounded-lg py-3 mt-8 hover:bg-yellow-700"
-          >
-            Crear Orden
-          </button>
-        </Modal>
-      </div>
-    </div>
+      </Modal>
+    </>
   );
 };
 

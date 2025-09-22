@@ -12,6 +12,7 @@ const RecentOrders = () => {
   const navigate = useNavigate();
   const { role } = useSelector((state) => state.user);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const isCashier = role === "Cajero";
 
   const { data: resData, isError } = useQuery({
     queryKey: ["orders"],
@@ -32,13 +33,25 @@ const RecentOrders = () => {
     return orders.filter((order) => isSameDay(order.orderDate, today));
   }, [orders]);
 
-  const filteredOrders =
-    role === "Cajero"
-      ? todaysOrders.filter(
-          (order) =>
-            order.orderStatus === "In Progress" || order.orderStatus === "Ready"
-        )
-      : todaysOrders;
+  const inProgressOrders = useMemo(() => {
+    if (!isCashier) return [];
+
+    return todaysOrders.filter((order) => order.orderStatus === "In Progress");
+  }, [isCashier, todaysOrders]);
+
+  const readyOrders = useMemo(() => {
+    if (!isCashier) return [];
+
+    return todaysOrders.filter((order) => order.orderStatus === "Ready");
+  }, [isCashier, todaysOrders]);
+
+  const renderOrderList = (ordersToRender, emptyMessage) => {
+    if (ordersToRender.length === 0) {
+      return <p className="text-sm text-gray-500">{emptyMessage}</p>;
+    }
+
+    return ordersToRender.map((order) => <OrderList key={order._id} order={order} />);
+  };
 
   return (
     <div className="w-full">
@@ -80,11 +93,27 @@ const RecentOrders = () => {
             className="bg-surfaceMuted w-full flex-1 text-textPrimary placeholder:text-textSecondary outline-none"
           />
         </div>
-        <div className="mt-4 space-y-3 overflow-y-auto pr-1 scrollbar-hide sm:max-h-80 xl:max-h-[300px] xl:px-2">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <OrderList key={order._id} order={order} />
-            ))
+        <div className="mt-4 space-y-5 overflow-y-auto pr-1 scrollbar-hide sm:max-h-80 xl:max-h-[300px] xl:px-2">
+          {isCashier ? (
+            <>
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase text-[#6c757d]">
+                  Pedidos en progreso
+                </p>
+                {renderOrderList(
+                  inProgressOrders,
+                  "No hay pedidos en progreso"
+                )}
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase text-[#6c757d]">
+                  Pedidos listos
+                </p>
+                {renderOrderList(readyOrders, "No hay pedidos listos")}
+              </div>
+            </>
+          ) : todaysOrders.length > 0 ? (
+            todaysOrders.map((order) => <OrderList key={order._id} order={order} />)
           ) : (
             <p className="text-sm text-gray-500">No hay pedidos disponibles</p>
           )}
