@@ -50,7 +50,9 @@ const RecentOrders = () => {
       return <p className="text-sm text-gray-500">{emptyMessage}</p>;
     }
 
-    return ordersToRender.map((order) => <OrderList key={order._id} order={order} />);
+    return ordersToRender.map((order) => (
+      <OrderList key={order._id} order={order} />
+    ));
   };
 
   return (
@@ -84,7 +86,9 @@ const RecentOrders = () => {
           </div>
         </div>
         <div
-          className={`mt-3 ${isSearchOpen ? "flex" : "hidden"} items-center gap-3 rounded-[15px] border border-gray-300 bg-[#FFFFF] px-4 py-2 focus-within:border-primary sm:mt-4 sm:flex sm:px-5`}
+          className={`mt-3 ${
+            isSearchOpen ? "flex" : "hidden"
+          } items-center gap-3 rounded-[15px] border border-gray-300 bg-[#FFFFF] px-4 py-2 focus-within:border-primary sm:mt-4 sm:flex sm:px-5`}
         >
           <FaSearch className="text-[#212529]" />
           <input
@@ -113,7 +117,9 @@ const RecentOrders = () => {
               </div>
             </>
           ) : todaysOrders.length > 0 ? (
-            todaysOrders.map((order) => <OrderList key={order._id} order={order} />)
+            todaysOrders.map((order) => (
+              <OrderList key={order._id} order={order} />
+            ))
           ) : (
             <p className="text-sm text-gray-500">No hay pedidos disponibles</p>
           )}
