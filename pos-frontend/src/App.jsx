@@ -12,6 +12,7 @@ import Header from "./components/shared/Header";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
 import FullScreenLoader from "./components/shared/FullScreenLoader";
+import useOfflineSync from "./hooks/useOfflineSync";
 
 function Layout() {
   const isLoading = useLoadData();
@@ -91,6 +92,7 @@ function ProtectedRoutes({ children }) {
 }
 
 function App() {
+  useOfflineSync();
   return (
     <Router>
       <Layout />
