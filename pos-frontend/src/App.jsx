@@ -12,6 +12,7 @@ import Header from "./components/shared/Header";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
 import FullScreenLoader from "./components/shared/FullScreenLoader";
+import useOfflineSync from "./hooks/useOfflineSync";
 
 function Layout() {
   const isLoading = useLoadData();
@@ -19,6 +20,8 @@ function Layout() {
   const navigate = useNavigate();
   const hideHeaderRoutes = ["/auth"];
   const { isAuth, role } = useSelector((state) => state.user);
+
+  useOfflineSync();
 
   useEffect(() => {
     if (isLoading || !isAuth) return;
