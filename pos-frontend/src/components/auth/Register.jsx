@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { register } from "../../https";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
+import {
+  enqueueOfflineRequest,
+  OFFLINE_QUEUE_TYPES,
+} from "../../utils/offlineQueue";
 
 const Register = ({ setIsRegister }) => {
   const [formData, setFormData] = useState({
@@ -22,6 +26,25 @@ const Register = ({ setIsRegister }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const isOffline =
+      typeof navigator !== "undefined" && navigator.onLine === false;
+
+    if (isOffline) {
+      enqueueOfflineRequest(OFFLINE_QUEUE_TYPES.USER_REGISTRATION, formData);
+      enqueueSnackbar(
+        "Sin conexion. El registro se enviara automaticamente cuando vuelvas en linea.",
+        { variant: "info" }
+      );
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "",
+      });
+      return;
+    }
+
     registerMutation.mutate(formData);
   };
 
