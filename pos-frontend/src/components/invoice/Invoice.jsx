@@ -39,7 +39,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-4 rounded-lg shadow-lg w-[400px]">
         {/* Receipt Content for Printing */}
 
@@ -106,12 +106,6 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           {/* Bills Summary */}
 
           <div className="mt-4 border-t pt-4 text-sm">
-            <p>
-              <strong>Subtotal:</strong> Bs {orderInfo.bills.total.toFixed(2)}
-            </p>
-            <p>
-              <strong>Impuesto:</strong> Bs {orderInfo.bills.tax.toFixed(2)}
-            </p>
             <p className="text-md font-semibold">
               <strong>Total:</strong>
               Bs {orderInfo.bills.totalWithTax.toFixed(2)}
