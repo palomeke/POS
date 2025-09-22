@@ -78,9 +78,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <p>
               <strong>Nombre:</strong> {orderInfo.customerDetails.name}
             </p>
-            <p>
-              <strong>Telefono:</strong> {orderInfo.customerDetails.phone}
-            </p>
+
             <p>
               <strong>Comensales:</strong> {orderInfo.customerDetails.guests}
             </p>

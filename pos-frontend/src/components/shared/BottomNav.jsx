@@ -96,20 +96,7 @@ const BottomNav = () => {
               />
             </div>
           </div>
-          <div>
-            <label className="block text-[#212529] mb-2 mt-3 text-sm font-medium">
-              Telefono
-            </label>
-            <div className="flex items-center rounded-lg p-3 px-4 border border-yellow-500 bg-[#FFFFFF]">
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                type="number"
-                placeholder="+591-9999999"
-                className="bg-transparent flex-1 text-[#212529] focus:outline-none"
-              />
-            </div>
-          </div>
+
           <div>
             <label className="block mb-2 mt-3 text-sm font-medium text-[#212529]">
               Cantidad de Personas
