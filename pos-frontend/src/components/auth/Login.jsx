@@ -1,10 +1,15 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../../https/index";
 import { enqueueSnackbar } from "notistack";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import {
+  canLoginOffline,
+  getStoredUser,
+  persistUserSession,
+} from "../../utils/offlineStorage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,29 +23,85 @@ const Login = () => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
+  const navigateByRole = (role) => {
+    if (role === "Administrador") {
+      navigate("/dashboard");
+    } else if (role === "Cocina") {
+      navigate("/orders");
+    } else {
+      navigate("/");
+    }
+  };
+
+  const attemptOfflineLogin = (credentials) => {
+    if (!credentials?.email || !credentials?.password) {
+      enqueueSnackbar("Completa tus credenciales para iniciar sesion.", {
+        variant: "warning",
+      });
+      return false;
+    }
+
+    const storedUser = getStoredUser();
+
+    if (!storedUser) {
+      enqueueSnackbar(
+        "No hay datos guardados para iniciar sesion sin conexion. Inicia sesion en linea al menos una vez.",
+        { variant: "warning" }
+      );
+      return false;
+    }
+
+    if (!canLoginOffline(credentials.email, credentials.password)) {
+      enqueueSnackbar("Las credenciales no coinciden con la sesion almacenada.", {
+        variant: "error",
+      });
+      return false;
+    }
+
+    dispatch(setUser(storedUser));
+    enqueueSnackbar("Sesion restaurada en modo offline", { variant: "info" });
+    navigateByRole(storedUser.role);
+    return true;
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    const isOffline =
+      typeof navigator !== "undefined" && navigator.onLine === false;
+
+    if (isOffline) {
+      attemptOfflineLogin(formData);
+      return;
+    }
+
     loginMutation.mutate(formData);
   };
 
   const loginMutation = useMutation({
     mutationFn: (reqData) => login(reqData),
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       const { data } = res;
       const { _id, name, email, phone, role } = data.data;
-      dispatch(setUser({ _id, name, email, phone, role }));
+      const userPayload = { _id, name, email, phone, role };
+      dispatch(setUser(userPayload));
+      persistUserSession(userPayload, variables?.password);
 
-      if (role === "Administrador") {
-        navigate("/dashboard");
-      } else if (role === "Cocina") {
-        navigate("/orders");
-      } else {
-        navigate("/");
-      }
+      navigateByRole(role);
     },
-    onError: (error) => {
-      const { response } = error;
-      enqueueSnackbar(response.data.message, { variant: "error" });
+    onError: (error, variables) => {
+      const isNetworkIssue =
+        (typeof navigator !== "undefined" && navigator.onLine === false) ||
+        error?.code === "ERR_NETWORK";
+
+      if (isNetworkIssue) {
+        const handledOffline = attemptOfflineLogin(variables);
+        if (handledOffline) return;
+      }
+
+      const message =
+        error?.response?.data?.message ||
+        "No se pudo iniciar sesion. Intenta nuevamente.";
+      enqueueSnackbar(message, { variant: "error" });
     },
   });
 

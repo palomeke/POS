@@ -8,10 +8,11 @@ import {
   verifyPaymentRazorpay,
 } from "../../https/index";
 import { enqueueSnackbar } from "notistack";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
+import { queueOfflineOrder } from "../../utils/offlineQueue";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -29,6 +30,7 @@ function loadScript(src) {
 
 const Bill = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const customerData = useSelector((state) => state.customer);
   const cartData = useSelector((state) => state.cart);
@@ -41,6 +43,44 @@ const Bill = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
+  const handleOfflineOrder = (orderData) => {
+    const tableMeta = customerData.table
+      ? {
+          tableId: customerData.table.tableId,
+          tableNo: customerData.table.tableNo,
+        }
+      : null;
+
+    const tableUpdatePayload = customerData.table
+      ? { tableId: customerData.table.tableId, status: "Booked" }
+      : null;
+
+    const offlinePreview = queueOfflineOrder(orderData, {
+      tableMeta,
+      tableUpdatePayload,
+    });
+
+    if (!offlinePreview) {
+      enqueueSnackbar("No se pudo guardar el pedido offline", {
+        variant: "error",
+      });
+      return;
+    }
+
+    setOrderInfo({ ...offlinePreview, paymentData: orderData.paymentData });
+    setShowInvoice(true);
+    dispatch(removeCustomer());
+    dispatch(removeAllItems());
+
+    queryClient.invalidateQueries(["orders"]);
+    queryClient.invalidateQueries(["tables"]);
+
+    enqueueSnackbar(
+      "Pedido guardado sin conexion. Se sincronizara automaticamente al recuperar la conexion.",
+      { variant: "info" }
+    );
+  };
+
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
       enqueueSnackbar("Selecciona un metodo de pago", {
@@ -50,7 +90,18 @@ const Bill = () => {
       return;
     }
 
+    const isOffline =
+      typeof navigator !== "undefined" && navigator.onLine === false;
+
     if (paymentMethod === "Online") {
+      if (isOffline) {
+        enqueueSnackbar(
+          "Necesitas conexion a internet para procesar pagos en linea.",
+          { variant: "warning" }
+        );
+        return;
+      }
+
       try {
         const res = await loadScript(
           "https://checkout.razorpay.com/v1/checkout.js"
@@ -138,6 +189,11 @@ const Bill = () => {
         table: customerData.table.tableId,
         paymentMethod: paymentMethod,
       };
+      if (isOffline) {
+        handleOfflineOrder(orderData);
+        return;
+      }
+
       orderMutation.mutate(orderData);
     }
   };

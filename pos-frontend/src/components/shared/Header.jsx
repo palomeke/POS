@@ -6,9 +6,11 @@ import { IoLogOut } from "react-icons/io5";
 import { useSelector, useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { enqueueSnackbar } from "notistack";
 import logo from "../../assets/images/logo.png";
 import { logout } from "../../https";
 import { removeUser } from "../../redux/slices/userSlice";
+import { clearStoredUser } from "../../utils/offlineStorage";
 
 const Header = () => {
   const userData = useSelector((state) => state.user);
@@ -18,17 +20,35 @@ const Header = () => {
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       dispatch(removeUser());
+      clearStoredUser();
       navigate("/auth");
+      enqueueSnackbar("Sesion cerrada correctamente", { variant: "success" });
     },
     onError: (error) => {
       console.log(error);
+      enqueueSnackbar("No se pudo cerrar la sesion. Intenta nuevamente.", {
+        variant: "error",
+      });
     },
   });
 
   const handleLogout = () => {
+    const isOffline =
+      typeof navigator !== "undefined" && navigator.onLine === false;
+
+    if (isOffline) {
+      clearStoredUser();
+      dispatch(removeUser());
+      navigate("/auth");
+      enqueueSnackbar(
+        "Sesion cerrada sin conexion. Se limpiaron los datos almacenados localmente.",
+        { variant: "info" }
+      );
+      return;
+    }
+
     logoutMutation.mutate();
   };
 
